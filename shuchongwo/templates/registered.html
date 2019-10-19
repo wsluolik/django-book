@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+         $.ajaxSetup({  
+            async : false  
+            }); 
+        function change_check(ths) {
+            ths.src = "/check_number?a=" + Math.ceil(Math.random() * 1000);
+        }
+        function submit() {
+            var is_ = true;
+            var uname = $("#name").val();
+            var em = $("#email").val();
+            var ps = $("#password").val();
+            var ps2 = $("#passtwo").val();
+            var cnum = $("#checknumber").val();
+            if (uname != "") {
+                if(uname.length>12)
+                {
+                    $("#ico_name").attr("class", "");
+                    $("#ico_name").text("用户名过长");
+                }
+                else
+                {
+                    $.get("check_name?name=" + uname, function (data, status) {
+                    if (status) {
+                        if (data == '1') {
+                            $("#ico_name").attr("class", "glyphicon glyphicon-ok");
+                            $("#ico_name").text("");
+                        }
+                        else {
+                            $("#ico_name").attr("class", "");
+                            $("#ico_name").text("用户名重复");
+                            is_ = false;
+                        }
+                    }
+                    else {
+                        alert("网络出现问题，无法查询用户名是否重复");
+                        $("#ico_name").attr("class", "");
+                        $("#ico_name").text("");
+                        is_ = false;    
+                    }
+                    });
+                }
+                
+            }
+            else
+            {
+                $("#ico_name").attr("class", "");
+                $("#ico_name").text("用户名不能为空");
+                is_ = false;
+            }
+            
+            if(em!="")
+            {
+                if(em.match(/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/))
+                {
+                    $("#ico_email").attr("class", "glyphicon glyphicon-ok");
+                    $("#ico_email").text("");
+                }
+                else
+                {
+                    $("#ico_email").attr("class", "");
+                    $("#ico_email").text("邮箱格式不正确");
+                    is_ = false;
+                }
+            }
+            else{
+                $("#ico_email").attr("class", "");
+                $("#ico_email").text("邮箱不能为空");
+                is_ = false;
+            }
+
+            if(ps!="")
+            {
+                if(ps.length<6||ps.length>30)
+                {
+                    $("#ico_password").attr("class", "");
+                    $("#ico_password").text("密码长度不符合要求");
+                    is_ = false;
+                }
+                else
+                {
+                    $("#ico_password").attr("class", "glyphicon glyphicon-ok");
+                    $("#ico_password").text("");
+                }
+            }
+            else{
+                $("#ico_password").attr("class", "");
+                $("#ico_password").text("密码不能为空");
+                is_ = false;
+            }
+
+            if(ps2==ps)
+            {
+                $("#ico_passtwo").attr("class", "glyphicon glyphicon-ok");
+                $("#ico_passtwo").text("");
+            }
+            else
+            {
+                $("#ico_passtwo").attr("class", "");
+                $("#ico_passtwo").text("两次密码不一致");
+                is_ = false;
+            }
+
+            if($("#xieyi").is(":checked"))
+            {
+                $("#ico_xiyi").text("");
+            }
+            else
+            {
+                $("#ico_xiyi").text("注册需要同意用户协议");
+                is_ = false;
+            }
+            
+            
+            if (cnum != "") {
+                $.get("check_num?checknum=" + cnum, function (data, status) {
+                    if (status) {
+                        if (data == '1') {
+                            $("#ico_check").attr("class", "glyphicon glyphicon-ok");
+                            $("#ico_check").text("");
+                        }
+                        else {
+                            $("#ico_check").attr("class", "");
+                            $("#ico_check").text("验证码错误，看不清可点击验证码图片更换");
+                            is_ = false;
+                        }
+                    }
+                    else {
+                        alert("网络出现问题，无法查询验证码");
+                        $("#ico_check").attr("class", "");
+                        $("#ico_check").text("");
+                        is_ = false;    
+                    }
+                });
+            }
+            else
+            {
+                $("#ico_check").attr("class", "");
+                $("#ico_check").text("验证码不能空");
+                is_ = false;
+            }
+            if(is_)
+            {
+                $("#regisreted_form").submit();
+            }           
+
+        }
+    </script>
+    <title>用户注册</title>
+</head>
+
+<body>
+    {% include 'head.html'%}
+    {% load static %}
+    <div class="container">
+
+        <div class="col-md-6 col-md-offset-3">
+            <h2 style="text-align: center; margin-top:45px;">用户注册</h2>
+            <form id="regisreted_form" class="form-horizontal" role="form" action="#" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">用户名：</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="name" name="name" placeholder="请输入用户名,12个字符内">
+                    </div>
+                    <div class="col-sm-3">
+                        <span id="ico_name" class="" style="color:#f00;"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">邮箱：</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="email" name="email" placeholder="请输入使用邮箱">
+                    </div>
+                    <div class="col-sm-3">
+                        <span id="ico_email" class="" style="color:#f00;"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">密码：</label>
+                    <div class="col-sm-6">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="6-30和字符，不能出现特殊字符">
+                    </div>
+                    <div class="col-sm-3">
+                            <span id="ico_password" style="color:#f00;"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">确认密码：</label>
+                    <div class="col-sm-6">
+                        <input type="password" class="form-control" id="passtwo" placeholder="确认密码">
+                    </div>
+                    <div class="col-sm-3">
+                        <span id="ico_passtwo" style="color:#f00;"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="col-sm-3 control-label">性别：</label>
+                    <div class="col-sm-6">
+                        <label class="radio-inline">
+                            <input type="radio" name="sex" id="male" name="sex" value="0" checked>男
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="sex" id="girl" name="sex" value="1">女
+                        </label>
+                    </div>
+                </div>
+                <div class=" form-group">
+                    <div class=" col-sm-6 col-sm-offset-3">
+                        <input id="xieyi" type="checkbox" checked>同意用户协议<a href=""> 用户协议</a>
+                    </div>
+                    <div class="col-sm-3">
+                        <span id="ico_xiyi" style="color:#f00;"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">验证码：</label>
+                    <div class="col-sm-3">
+                        <input type="text" name="checknumber" class="form-control" id="checknumber" >
+                    </div>
+                    <div class="col-sm-3">
+                        <img src="/check_number" alt="" height="30px" onclick="change_check(this)">
+                    </div>
+                    <div class="col-sm-3">
+                        <span id="ico_check" class="" style="color:#f00;"></span>
+                    </div>
+                </div>
+
+            </form>
+            <button class="btn col-sm-offset-3" onclick="submit()">提交</button>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>书虫窝</title>
+	<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">  
+	<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+	{% include 'head.html' %}
+	<!--中部-->
+	<div>
+		<div class="container">
+			<div>
+				<!-- 热门推荐 -->
+				<div>
+					<div class="col-md-8 bg-block m-botton-25">
+						<div class="col-md-12 clearfix row">
+							<div style="float:left;font-size:28px;">热门推荐</div>
+							<a style="float:right; line-height:28px;" href="">更多</a>
+						</div>
+				
+						<div id="recommend" class="col-md-12 row">
+							{% for rec in rec_list%}
+								<div class='madia col-md-2 col-sm-3 col-xs-4'>
+									<div madia-body>
+										<a href='/book/{{rec.bid}}'><img src='/static/shuchongwo/book/{{rec.bid}}/fm.jpg' alt='' class='img-responsive'></a>
+										<p class=''><a href='/book/{{rec.bid}}'>{{rec.bname}}</a></p>
+									</div>
+								</div>
+							{% endfor%}	
+						</div>
+					</div>
+						
+
+					<!-- 热门标签-->
+					<div class="col-md-4 clearfix">
+						<div class="col-md-12 clearfix">
+							<div style="float:left; font-size:28px;">热门标签</div>
+							<a href="" style="float:right; line-height: 28px;">更多</a>
+						</div>
+
+						<div class="col-md-12 clearfix">
+							{% for i in rec_table_list%}
+							<a href="/table/{{i}}"><span class="btn btn-info" style="font-size:14px; margin-bottom: 5px;">{{i}}</span></a>
+							{% endfor%}		
+						</div>
+					</div>
+					
+				</div>
+
+				<!-- 热门推荐 end -->
+				
+				<!-- 排行 -->
+				<div class="col-md-12 clearfix">
+					<div class="col-md-4 col-xs-12">
+						<div class="col-md-12 clearfix">
+							<div style="font-size:28px;">点击排行</div>
+								{% for i in top_click_list %}
+								<div class="media">
+									<div class="media-left">
+										<a href="/book/{{i.bid}}">
+											<img src="/static/shuchongwo/book/{{i.bid}}/fm.jpg" alt="" style="width:80px">
+										</a>
+									</div>
+									<div class="media-body">
+										<h4 class="media-heading"><a href="/book/{{i.bid}}">{{i.bname}}</a></h4>
+										<p><a href="/author/{{i.author}}">作者：{{i.author}}</a></p>
+										<p>最新:{{i.newz}}</p>
+									</div>
+								</div>
+								{% endfor %}
+						</div>
+					</div>
+					<div class="col-md-4 col-xs-12">
+						<div class="col-md-12 clearfix">
+							<div style="font-size:28px;">推荐排行</div>
+							{% for i in top_recommend_list %}
+							<div class="media">
+								<div class="media-left">
+									<a href="/book/{{i.bid}}">
+										<img src="/static/shuchongwo/book/{{i.bid}}/fm.jpg" alt="" style="width:80px">
+									</a>
+								</div>
+								<div class="media-body">
+									<h4 class="media-heading"><a href="/book/{{i.bid}}">{{i.bname}}</a></h4>
+									<p><a href="/author/{{i.author}}">作者：{{i.author}}</a></p>
+									<p>最新:{{i.newz}}</p>
+								</div>
+							</div>
+							{% endfor %}
+						</div>
+					</div>
+					<div class="col-md-4 col-xs-12">
+						<div class="col-md-12 clearfix">
+							<div style="font-size:28px;">收藏排行</div>
+							{% for i in top_collection_list %}
+							<div class="media">
+								<div class="media-left">
+									<a href="/book/{{i.bid}}">
+										<img src="/static/shuchongwo/book/{{i.bid}}/fm.jpg" alt="" style="width:80px">
+									</a>
+								</div>
+								<div class="media-body">
+									<h4 class="media-heading"><a href="/book/{{i.bid}}">{{i.bname}}</a></h4>
+									<p><a href="/author/{{i.author}}">作者：{{i.author}}</a></p>
+									<p>最新:{{i.newz}}</p>
+								</div>
+							</div>
+							{% endfor %}
+						</div>
+					</div>
+				</div>
+				
+
+			</div>
+		</div>
+	</div>
+	<!--尾部-->
+	{% include 'bottom.html' %}
+</body>
+</html>

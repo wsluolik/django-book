@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>书虫窝</title>
+	<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">  
+	<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+	<script src="/static/jquery/jquery.cookie.js"></script>
+	<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script>
+		$(document).ready(function(){
+			$("#show_upload").click(function(){
+				$("#upload_box").css("visibility","visible");
+			});
+			$("#hide_upload").click(function(){
+				$("#upload_box").css("visibility","hidden");
+			});
+
+			$("#b_pinglun").click(function(){
+				var pl = $('#pinglun').val();
+				if(pl==''||pl==null)
+				{
+					alert('评论内容不能为空');
+					return;
+				}
+				var form_data = new FormData();
+				form_data.append('csrfmiddlewaretoken',$('input[name="csrfmiddlewaretoken"]').val());
+				form_data.append('bid',$('#bid').val());
+				form_data.append('pinglun',pl);
+					$.ajax({
+						url:'/book_pinglun',
+						type:'post',
+						data:form_data,
+						contentType: false,
+						processData: false,
+						success:function(res){
+							if(res=="suc"){
+								alert('评论成功');
+								window.location.reload();//刷新当前页面
+							}else if(res=="error"){
+								alert('评论失败');
+							}else{
+								console.log(res);
+							}
+						}
+
+					});
+			});
+			$("#text_upload").click(function(){
+				var u_link = $("#download_text").val();
+				if(u_link ==""||u_link == null||u_link==undefined)
+				{
+					alert("提交链接不能为空！");
+				}
+				else
+				{
+					var form_data = new FormData();
+					form_data.append('csrfmiddlewaretoken',$('input[name="csrfmiddlewaretoken"]').val());
+					form_data.append('bid',$('#bid').val());
+					form_data.append('type','text');
+					form_data.append('link',$("#download_text").val());
+					$.ajax({
+						url:'/book_ressources',
+						type:'post',
+						data:form_data,
+						contentType: false,
+						processData: false,
+						success:function(res){
+							if(res=="suc"){
+								alert('上传成功');
+								$("#upload_box").css("visibility","hidden");
+								window.location.reload();//刷新当前页面
+							}else if(res=="error"){
+								alert('失败');
+							}else{
+								console.log(res);
+							}
+						}
+
+					});
+				}
+			});
+
+
+			$("#res_upload").click(function(){
+				var fileInput = $('#resources')[0].files[0];
+				var location=$('#resources').val();
+				var point = location.lastIndexOf("."); 
+     			var type = location.substr(point);
+				if(!fileInput)
+				{
+					alert("请选择上传文件！");
+				}
+				else if(type==".txt"||type==".zip"||type==".rar"||type==".7z")
+				{
+					var form_data = new FormData();
+					form_data.append('csrfmiddlewaretoken',$('input[name="csrfmiddlewaretoken"]').val());
+					form_data.append('bid',$('#bid').val());
+					form_data.append('type','file');
+					form_data.append('res',fileInput);
+					$("#pro_box").css("visibility","visible");
+
+					var xhrOnProgress=function(fun) {
+						xhrOnProgress.onprogress = fun; //绑定监听
+						//使用闭包实现监听绑
+						return function() {
+							//通过$.ajaxSettings.xhr();获得XMLHttpRequest对象
+							var xhr = $.ajaxSettings.xhr();
+							//判断监听函数是否为函数
+							if (typeof xhrOnProgress.onprogress !== 'function')
+							return xhr;
+							//如果有监听函数并且xhr对象支持绑定时就把监听函数绑定上去
+							if (xhrOnProgress.onprogress && xhr.upload) {
+							xhr.upload.onprogress = xhrOnProgress.onprogress;
+							}
+							return xhr;
+						}
+					}
+					$.ajax({
+						url:'/book_ressources',
+						type:'post',
+						data:form_data,
+						contentType: false,
+						processData: false,
+						//进度条要调用原生xhr
+						xhr:xhrOnProgress(function(evt){
+							var percent = Math.floor(evt.loaded / evt.total*100);//计算百分比
+							console.log(percent);
+							// 设置进度条样式
+							$("#updata_pro").css("width",percent+"%");
+						}),
+						success:function(res){
+							if(res=="suc"){
+								alert('上传成功');
+								$("#upload_box").css("visibility","hidden");
+								$("#pro_box").css("visibility","hidden");
+								window.location.reload();//刷新当前页面
+							}else if(res=="error"){
+								alert('失败');
+							}else{
+								console.log(res);
+							}
+						}
+
+					});
+				}
+				else
+				{
+					alert("文件格式不正确，请上传txt、zip、rar或者7z格式的文件");
+				}
+			});
+			//<input type="hidden" name="csrfmiddlewaretoken" value="">
+
+			$("#recommend").click(function(){
+				bid = $('#bid').val()
+				n = bid + '_recommend'
+				if($.cookie(n) == undefined)
+				{
+					$.get("/book_r?r=recommend&bid=" + bid, function (data, status) {
+						if (status) {
+							if(data == 'suc')
+							{
+								alert('推荐成功')
+								$.cookie(n,'1',{expires: 999})
+							}
+							else {
+                        	alert("推荐失败，请再次尝试");
+                    		}
+						}
+						else {
+                        	alert("推荐失败，请再次尝试");
+                    	}
+                	});
+				}
+				else
+				{
+					alert('你已经推荐过了，不需要再次推荐');
+				}
+			});
+
+			$("#collection").click(function(){
+				bid = $('#bid').val()
+				$.get("/book_r?r=collection&bid=" + bid, function (data, status) {
+						if (status) {
+							if(data == 'suc')
+							{
+								alert('收藏成功')
+								
+							}
+							else if(data == 'unlogin')
+							{
+								alert("登录后才能收藏");
+							}
+							else if(data == 'repeat')
+							{
+								alert('你已经收藏过该书籍');
+							}
+							else {
+                        	alert("收藏失败，请再次尝试");
+                    		}
+						}
+						else {
+                        	alert("推荐失败，请再次尝试");
+                    	}
+                	});
+				
+			});
+
+			$("#report").click(function(){
+				bid = $('#bid').val()
+				n = bid + '_report'
+				if($.cookie(n) == undefined)
+				{
+					$.get("/book_r?r=report&bid=" + bid, function (data, status) {
+						if (status) {
+							if(data == 'suc')
+							{
+								alert('举报成功')
+								$.cookie(n,'1',{expires: 999})
+							}
+							else {
+                        	alert("举报失败，请再次尝试");
+                    		}
+						}
+						else {
+                        	alert("推荐失败，请再次尝试");
+                    	}
+                	});
+				}
+				else
+				{
+					alert('你已经举报过了，管理员正在处理的路上');
+				}
+			});
+		});
+	</script>
+</head>
+<body>
+
+	{% include 'head.html' %}
+	<!--中部-->
+	<div>
+		<div class="container">
+			<div class="col-md-8">
+				<div class="media">
+					<div class="media-left"><img src="/static/shuchongwo/book/{{book.bid}}/fm.jpg" alt="" style="width: 200px"></div>
+					<div class="media-body">
+						<h2 class="media-heading">{{book.name}}</h2>
+						<p>作者：<a href="/author/{{book.author}}">{{book.author}}</a></p>
+						<p>字数：{{book.words}}万</p>
+						<p>类别：<a href="/type/{{book.bclass}}">{{book.bclass}}</a></p>
+						<p>最新章节：{{book.newz}}</p>
+						<p>{{book.descirption}}
+						</p>
+						<p>标签：
+							{% for i in lable %}
+							<a href="/table/{{i}}"><span class="btn btn-info" style="font-size:12px; margin-bottom: 5px;">{{i}}</span></a>
+							{% endfor %}
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-offset-1 col-md-3" >
+				<h3>作品资源</h3>
+				<p><a href="{{book.burl}}" target="view_window" >{{book.burl}}</a></p>
+				<div style="height:220px;overflow:auto;" >
+					{% for r in res%}
+						{% if r.type == 'txt' %}
+							<p><a href="/user/{{r.updata_uid}}">{{r.updata_name}}</a>上传:{{r.link}}</p>
+						{% else%}
+							<p><a href="/user/{{r.updata_uid}}">{{r.updata_name}}</a>上传:<a href="{{r.link}}">{{r.filename}}</a></p>
+						{% endif%}
+					{% endfor%}
+				</div>
+				<button id="show_upload" class="btn btn-info">我要上传资源</button>
+			</div>
+			{% csrf_token %}
+			<div class="col-md-8 panel-group" id="mulu">
+					<div class="panel panel-default">
+							<div class="panel-heading">
+								<h4 class="panel-title">
+									<a data-toggle="collapse" data-parent="#mulu" 
+									   href="#collapseOne">
+										查看目录
+									</a>
+								</h4>
+							</div>
+							<div id="collapseOne" class="panel-collapse collapse on">
+								<div class="panel-body">
+									{% for i in mulu%}
+									<p class="col-md-4">{{i}}</p>
+									{% endfor %}
+								</div>
+							</div>
+					</div>
+			</div>
+		</div>
+
+		<div class="container">
+			<div class="col-md-offset-3">
+				<button id="collection" class="btn btn-info"><span class="glyphicon glyphicon-bookmark"></span>收藏</button>
+				<button id="recommend" class="btn btn-info"><span class="glyphicon glyphicon-heart"></span>推荐</button>
+				<button id="report" class="btn btn-info"><span class="glyphicon glyphicon-thumbs-down"></span>举报</button>
+			</div>
+			<div></div>
+		</div>
+		<div class="container">
+			<div class="col-md-8">
+				<h2 >留言/评论</h2>
+				<div>
+					{% if pinglun == '' %}
+						<p>暂无评论</p>
+					{% endif %}
+
+					{% for p in pinglun%}
+					<p><a href="/user/{{p.uid}}">{{p.uname}}</a>:{{p.pl}}</p>
+					{% endfor %}
+				</div>
+				
+				<div>
+					<textarea id="pinglun" class="form-control" rows="3"></textarea>
+					<p><button id="b_pinglun">评论</button></p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--弹出框-->
+	<div id="upload_box" class="col-md-6 col-sm-10 col-sx-10 col-md-offset-3 col-sm-offset-1 col-sx-offset-1 form-group"
+	style="position: absolute; z-index: 2;top:120px; background: rgb(241, 212, 212); border:2px sloid #000;visibility:hidden;"
+	>
+		{% csrf_token %}
+		<input id="bid" type="hidden" value="{{book.bid}}">
+		<p><button id="hide_upload"class="pull-right btn btn-info"><span class="glyphicon glyphicon-remove"></span></button></p>
+		<div class="panel-group" id="accordion">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h4 class="panel-title">
+							<a data-toggle="collapse" data-parent="#accordion" 
+							   href="#collapse_link">
+								资源链接
+							</a>
+						</h4>
+					</div>
+					<div id="collapse_link" class="panel-collapse collapse">
+						<div class="panel-body">
+							<p><input id="download_text" type="text" class="form-control" placeholder="资源的下载链接"></p>
+							<button id="text_upload" class="btn btn-info">上传</button>
+						</div>
+					</div>
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h4 class="panel-title">
+							<a data-toggle="collapse" data-parent="#accordion" 
+							   href="#collapse_file">
+								文件上传
+							</a>
+						</h4>
+					</div>
+					<div id="collapse_file" class="panel-collapse collapse">
+						<div class="panel-body">
+								<p><input id="resources" type="file"></p>
+								<p><button id="res_upload" class="btn btn-info">上传</button></p>
+								<div id="pro_box" class="progress" style="visibility:hidden;">
+									<div id="updata_pro" class="progress-bar progress-bar-info" role="progressbar"
+										 aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
+										 style="width: 0%;">
+									</div>
+								</div>
+						</div>
+					</div>
+				</div>
+			</div>
+	</div>
+	<!--尾部-->
+	{% include 'bottom.html' %}
+</body>
+</html>
